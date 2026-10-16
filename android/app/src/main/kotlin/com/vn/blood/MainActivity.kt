@@ -1,4 +1,4 @@
-package com.example.blood_connect
+package com.vn.blood
 
 import io.flutter.embedding.android.FlutterActivity
 

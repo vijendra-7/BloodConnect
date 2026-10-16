@@ -202,6 +202,44 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 32),
+                    Center(
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Crafted by ',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                                ),
+                              ),
+                              Text(
+                                'VN LABS',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.2,
+                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.75),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'BloodConnect v1.0.0',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 40),
                   ],
                 ),

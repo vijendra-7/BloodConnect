@@ -101,6 +101,29 @@ class LoginScreen extends ConsumerWidget {
                         color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
                       ),
                     ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'from ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.35),
+                          ),
+                        ),
+                        Text(
+                          'VN LABS',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 32),
                   ],
                 ),
