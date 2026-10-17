@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 enum UserRole { donor, seeker, organization, admin, none }
 
 class UserState {
+  final String uid;
   final UserRole role;
   final String name;
   final String location;
@@ -13,6 +14,7 @@ class UserState {
   final DateTime? lastDonated;
 
   UserState({
+    this.uid = '',
     this.role = UserRole.none,
     this.name = '',
     this.location = '',
@@ -24,6 +26,7 @@ class UserState {
   });
 
   UserState copyWith({
+    String? uid,
     UserRole? role,
     String? name,
     String? location,
@@ -35,6 +38,7 @@ class UserState {
     bool clearLastDonated = false,
   }) {
     return UserState(
+      uid: uid ?? this.uid,
       role: role ?? this.role,
       name: name ?? this.name,
       location: location ?? this.location,
@@ -50,7 +54,11 @@ class UserState {
 class UserNotifier extends Notifier<UserState> {
   @override
   UserState build() {
-    return UserState();
+    return UserState(uid: 'user_local_1');
+  }
+
+  void setUid(String uid) {
+    state = state.copyWith(uid: uid);
   }
 
   void setRole(UserRole role) {
@@ -102,6 +110,7 @@ class UserNotifier extends Notifier<UserState> {
 
   void adminLogin() {
     state = UserState(
+      uid: 'admin_master_1',
       role: UserRole.admin,
       name: 'System Admin',
       location: 'Global',

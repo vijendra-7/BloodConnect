@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -78,21 +79,23 @@ class LoginScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    TextButton(
-                      onPressed: () {
-                        // Dev: login as admin directly
-                        ref.read(userProvider.notifier).adminLogin();
-                        context.go('/admin');
-                      },
-                      child: Text(
-                        'Admin Access (Dev)',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
-                          fontWeight: FontWeight.bold,
+                    if (kDebugMode) ...[
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () {
+                          // Dev: login as admin directly
+                          ref.read(userProvider.notifier).adminLogin();
+                          context.go('/admin');
+                        },
+                        child: Text(
+                          'Admin Access (Dev)',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                     const SizedBox(height: 16),
                     Text(
                       'By continuing, you agree to our Terms of Service\nand Privacy Policy.',

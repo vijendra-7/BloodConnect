@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:blood_connect/core/providers/user_provider.dart';
+import 'package:blood_connect/features/requests/presentation/providers/my_requests_provider.dart';
 import 'package:blood_connect/shared/widgets/swipe_to_confirm.dart';
 
 class RequestDetailsScreen extends ConsumerStatefulWidget {
@@ -18,6 +20,12 @@ class RequestDetailsScreen extends ConsumerStatefulWidget {
 class _RequestDetailsScreenState extends ConsumerState<RequestDetailsScreen> {
   String _status = 'active'; 
   int _bags = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _status = widget.requestData?['status']?.toString() ?? 'active';
+  }
 
   Future<void> _openMaps(double lat, double lng) async {
     final url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
@@ -69,6 +77,10 @@ class _RequestDetailsScreenState extends ConsumerState<RequestDetailsScreen> {
             const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: () {
+                final id = widget.requestData?['id']?.toString() ?? '';
+                if (id.isNotEmpty) {
+                  ref.read(myRequestsProvider.notifier).markOnTheWay(id);
+                }
                 Navigator.pop(context);
                 setState(() => _status = 'on_the_way');
               },
@@ -89,8 +101,15 @@ class _RequestDetailsScreenState extends ConsumerState<RequestDetailsScreen> {
             const SizedBox(height: 12),
             TextButton.icon(
               onPressed: () {
+                final id = widget.requestData?['id']?.toString() ?? '';
+                if (id.isNotEmpty) {
+                  ref.read(myRequestsProvider.notifier).updateRequestStatus(id, 'active', extraData: {
+                    'acceptedBy': null,
+                    'acceptedAt': null,
+                  });
+                }
                 Navigator.pop(context);
-                setState(() => _status = 'active'); // cancelled
+                setState(() => _status = 'active');
               },
               icon: const Icon(Icons.cancel, color: Colors.red),
               label: const Text('I can\'t make it', style: TextStyle(color: Colors.red)),
@@ -437,6 +456,15 @@ class _RequestDetailsScreenState extends ConsumerState<RequestDetailsScreen> {
         text: 'SWIPE TO ACCEPT',
         activeColor: Theme.of(context).colorScheme.primary,
         onConfirm: () {
+          final id = widget.requestData?['id']?.toString() ?? '';
+          final userName = ref.read(userProvider).name;
+          if (id.isNotEmpty) {
+            ref.read(myRequestsProvider.notifier).acceptRequest(
+              id, 
+              userName.isEmpty ? 'Volunteer Donor' : userName
+            );
+          }
+          setState(() => _status = 'accepted');
           Future.delayed(const Duration(milliseconds: 1500), () {
             if (mounted) {
               _showOnTheWaySheet();
@@ -523,7 +551,10 @@ class _RequestDetailsScreenState extends ConsumerState<RequestDetailsScreen> {
           const SizedBox(height: 16),
           FilledButton(
             onPressed: () {
-              // Usually we'd call provider here: ref.read(myRequestsProvider.notifier).donorConfirm(id, _bags)
+              final id = widget.requestData?['id']?.toString() ?? '';
+              if (id.isNotEmpty) {
+                ref.read(myRequestsProvider.notifier).donorConfirm(id, _bags);
+              }
               setState(() => _status = 'donor_confirmed');
             },
             style: FilledButton.styleFrom(

@@ -45,18 +45,33 @@ class _PostRequestScreenState extends ConsumerState<PostRequestScreen> {
 
   void _submitRequest() {
     if (_formKey.currentState!.validate() && _selectedBloodType != null && _selectedUrgency != null && _selectedLocation != null) {
-      // Save locally to provider for UI flow demonstration
+      final patientName = _patientNameController.text.trim();
+      final hospitalName = _hospitalController.text.trim();
+      final bloodType = _selectedBloodType!;
+      final units = int.tryParse(_unitsController.text.trim()) ?? 1;
+      final urgency = _selectedUrgency!;
+      final contact = _contactController.text.trim();
+      final location = _selectedLocation!;
+
+      // Save locally to provider
       ref.read(myRequestsProvider.notifier).addRequest({
-        'patient': _patientNameController.text.trim(),
-        'hospital': _hospitalController.text.trim(),
-        'bloodType': _selectedBloodType,
-        'units': _unitsController.text.trim(),
-        'urgency': _selectedUrgency,
-        'contact': _contactController.text.trim(),
-        'lat': _selectedLocation!.latitude,
-        'lng': _selectedLocation!.longitude,
+        'patient': patientName,
+        'hospital': hospitalName,
+        'bloodType': bloodType,
+        'units': units.toString(),
+        'urgency': urgency,
+        'contact': contact,
+        'lat': location.latitude,
+        'lng': location.longitude,
       });
-      
+
+      // Update active search context BEFORE clearing the form
+      ref.read(directoryActiveContextProvider.notifier).setContext(DirectoryActiveContext(
+        isActive: true,
+        bloodType: bloodType,
+        location: hospitalName,
+      ));
+
       // Clear form
       _patientNameController.clear();
       _hospitalController.clear();
@@ -69,21 +84,16 @@ class _PostRequestScreenState extends ConsumerState<PostRequestScreen> {
         _selectedRelation = null;
         _selectedLocation = null;
       });
-      
-      // Update active search context so the directory pre-filters for this emergency
-      ref.read(directoryActiveContextProvider.notifier).setContext(DirectoryActiveContext(
-        isActive: true,
-        bloodType: _selectedBloodType,
-        location: _selectedLocation == null ? null : _hospitalController.text.trim(),
-      ));
-      
+
       // Navigate to home and specifically the Directory tab (index 0)
       ref.read(mainTabIndexProvider.notifier).setIndex(0);
       context.go('/home');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Please fill out all fields and select a location.'),
+          content: Text(_selectedLocation == null 
+              ? 'Please pin hospital location on the map.' 
+              : 'Please fill out all required fields.'),
           backgroundColor: Colors.orange.shade800,
         ),
       );
@@ -184,7 +194,14 @@ class _PostRequestScreenState extends ConsumerState<PostRequestScreen> {
                   controller: _contactController,
                   keyboardType: TextInputType.phone,
                   decoration: _buildInputDecoration('Contact Number', Icons.phone_outlined),
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return 'Contact number is required';
+                    final cleaned = v.trim().replaceAll(RegExp(r'[\s\-]'), '');
+                    if (!RegExp(r'^\+?[0-9]{10,13}$').hasMatch(cleaned)) {
+                      return 'Enter a valid 10-digit phone number';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 24),
                 
@@ -208,7 +225,13 @@ class _PostRequestScreenState extends ConsumerState<PostRequestScreen> {
                         controller: _unitsController,
                         keyboardType: TextInputType.number,
                         decoration: _buildInputDecoration('Units', Icons.water_drop_outlined),
-                        validator: (v) => v!.isEmpty ? 'Req' : null,
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) return 'Req';
+                          final num = int.tryParse(v.trim());
+                          if (num == null || num <= 0) return 'Min 1';
+                          if (num > 10) return 'Max 10';
+                          return null;
+                        },
                       ),
                     ),
                   ],
